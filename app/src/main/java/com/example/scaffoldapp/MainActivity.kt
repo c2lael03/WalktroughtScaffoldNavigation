@@ -1,96 +1,52 @@
 package com.example.scaffoldapp
 
-//import androidx.compose.material.DropdownMenu
 import androidx.navigation.compose.NavHost
 import androidx.compose.foundation.layout.padding
-
 import androidx.compose.material3.DropdownMenuItem
-//import androidx.compose.ui.*
-
 import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-//import androidx.compose.foundation.background
-//import androidx.compose.foundation.layout.Arrangement
-//import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-/*
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.consumeWindowInsets
-*/
 import androidx.compose.foundation.layout.fillMaxSize
-/*
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-*/
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
-//import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
-/*
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DrawerValue
-*/
 import androidx.compose.material3.DropdownMenu
-//import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
-//import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
-//import androidx.compose.material3.FloatingActionButton
+import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-//import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
-//import androidx.compose.material3.MediumTopAppBar
-//import androidx.compose.material3.ModalDrawerSheet
-//import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-//import androidx.compose.material3.NavigationDrawerItem
-//import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
-//import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-//import androidx.compose.material3.TopAppBarDefaults
-//import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-//import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-//import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-//import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-//import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-//import androidx.navigation.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.scaffoldapp.ui.theme.ScaffoldAppTheme
-//import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
@@ -109,10 +65,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-
 fun MyScaffoldLayout() {
+    // Create a NavController instance
+    val navController = rememberNavController()
     //val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
     //val coroutineScope = rememberCoroutineScope()
@@ -151,13 +108,34 @@ fun MyScaffoldLayout() {
     Scaffold(
         topBar = { MainTopBar("My App", navController = rememberNavController()) },// huom!!??? ks tuo navController rivi!!
         //content = { Text(text= "Sisältöä Etusivulle")},
-        bottomBar = { MyBottomBar(contextForToast = contextForToast) },
+        
+        bottomBar = { 
+            MyBottomBar(
+                //contextForToast = contextForToast
+                containerColor = Color.Green // Change color as desired
+            ) {
+                Text(text = "Bottom bar")
+            }
+        },
+        
         //floatingActionButton = { MyFAB(contextForToast = contextForToast) },
         floatingActionButtonPosition = FabPosition.End,
         snackbarHost = { SnackbarHost(snackbarHostState) },
 
         ) { paddingValues ->
+        NavHost(navController, startDestination = "mainScreen", Modifier.padding(paddingValues)) {
+            composable("mainScreen") {
+                MainScreen(navController) // Pass navController here
+            }
+            composable("infoScreen") {
+                InfoScreen(navController)
+            }
+            composable("settingsScreen") {
+                SettingsScreen(navController)
+            }            
+        
         // rest of the app's UI
+        /*
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -166,7 +144,7 @@ fun MyScaffoldLayout() {
             //horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "Sisältöä Etusivulle")
-            /*
+            
             Button(
                 onClick = {
                     coroutineScope.launch {
@@ -220,6 +198,7 @@ fun MainTopBar(title: String, navController: NavController) {
                 onDismissRequest = { expanded = false }
             ) {
                 // alla oleva koodi material3-kirjaston mukaista koodia
+                /* vaihtoehto 1
                 DropdownMenuItem(
                     text = { Text("Info") },
                     onClick = { navController.navigate("Info") }
@@ -229,6 +208,21 @@ fun MainTopBar(title: String, navController: NavController) {
                     text = { Text("Settings") },
                     onClick = { navController.navigate("Settings") }
                 )
+                */
+                // vaihtoehto 2
+                val options = listOf("Info", "Settings")
+                options.forEach { label ->
+                    DropdownMenuItem(
+                        text = { Text(text = label) },
+                        onClick = {
+                            expanded = false // Close menu after selection
+                            when (label) {
+                                "Info" -> navController.navigate("infoScreen")
+                                "Settings" -> navController.navigate("settingsScreen")
+                            }
+                        }
+                    )
+                }
             }
         }
     )
@@ -294,7 +288,7 @@ fun InfoScreen(navController: NavController) {
 @Composable
 fun SettingsScreen(navController: NavController) {
     Scaffold(
-        topBar = { MainTopBar("Settings", navController) },//HUOM!! Ks tuo navController-osio!!
+        topBar = { ScreenTopBar("Settings", navController) },//HUOM!! Ks tuo navController-osio!!
         //content = { Text(text = "Sisältöä Settings-sivulle")}
     )
     { paddingValues ->
@@ -312,9 +306,9 @@ fun SettingsScreen(navController: NavController) {
 }
 
 
-
 @Composable
 fun ScaffoldApp() {
+    //vaihtoehto1
     val navController = rememberNavController()
     NavHost(
         navController = navController,
@@ -332,18 +326,13 @@ fun ScaffoldApp() {
     }
 }
 
-
-
-/*
+@Preview(showBackground = true)
 @Composable
-fun MyFAB(contextForToast: Context) {
-    ExtendedFloatingActionButton(
-        onClick = { Toast.makeText(contextForToast, "FAB", Toast.LENGTH_SHORT)
-            .show() },
-        icon = { Icon(imageVector = Icons.Default.Add, contentDescription = "add icon") },
-        text = { Text(text = "Extended FAB") },
-        )
-} */
+fun PreviewMyScaffoldLayout() {
+    ScaffoldAppTheme {
+        MyScaffoldLayout()
+    }
+}
 
 
 @Composable
